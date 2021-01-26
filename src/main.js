@@ -10,6 +10,7 @@ function Chat() {
     this.msgGroupJson = {}; // Group chat message list
     this.tag = 0; // 0 My Friends Panel 1 Group Chat Panel
 }
+
 Chat.prototype = {
     init() {
         this.userName = localStorage.getItem('userName');
