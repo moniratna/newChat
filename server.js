@@ -16,13 +16,15 @@ io.on('connection', (socket) => {
         } else if (!peersByRoom[data.roomID].find(peer => peer.id === data.userID)) {
             peersByRoom[data.roomID].push({ id: data.userID });
         }
-        const newMessage = { ...data, peers: peersByRoom[data.roomID] }
 
-        peersByRoom[data.roomID]
-            .filter(peer => peer.id !== data.userID)
-            .forEach(peer => {
-                socket.to(`${data.roomID}`).emit('messageToFE', newMessage)
-            });
+        let newMessage = { ...data, peers: peersByRoom[data.roomID] }
+        
+        if (data.type === 'leave') {
+            newMessage = { ...data, peers: peersByRoom[data.roomID]
+                .filter(peer => peer.id !== data.userID) }
+        }
+ 
+        socket.to(`${data.roomID}`).broadcast.emit('messageToFE', newMessage);
     });
 
     socket.on('disconnect', () => {
