@@ -4,27 +4,35 @@ var app = express();
 var http = require('http').Server(app);
 var io = require("socket.io")(http);
 
+
+
+app.use(express.static('static'));
+
+
+
 let peersByRoom = {};
 
 io.on('connection', (socket) => {
     console.log('connected');
-    socket.on('messageToBE', data => {
-        socket.join(`${data.roomID}`);
+    socket.on('messageToBE',(room,messages,name) => {
+        socket.join(room);
+        console.log(room)
 
-        if (!peersByRoom[data.roomID]) {
-            peersByRoom[data.roomID] = [{ id: data.userID }];
-        } else if (!peersByRoom[data.roomID].find(peer => peer.id === data.userID)) {
-            peersByRoom[data.roomID].push({ id: data.userID });
-        }
+        // if (!peersByRoom[data.roomID]) {
+        //     peersByRoom[data.roomID] = [{ id: data.userID }];
+        // } else if (!peersByRoom[data.roomID].find(peer => peer.id === data.userID)) {
+        //     peersByRoom[data.roomID].push({ id: data.userID });
+        // }
 
-        let newMessage = { ...data, peers: peersByRoom[data.roomID] }
+        // let newMessage = { ...data, peers: peersByRoom[data.roomID] }
         
-        if (data.type === 'leave') {
-            newMessage = { ...data, peers: peersByRoom[data.roomID]
-                .filter(peer => peer.id !== data.userID) }
-        }
+        // if (data.type === 'leave') {
+        //     newMessage = { ...data, peers: peersByRoom[data.roomID]
+        //         .filter(peer => peer.id !== data.userID) }
+        // }
  
-        socket.to(`${data.roomID}`).broadcast.emit('messageToFE', newMessage);
+        socket.to(room).broadcast.emit('messageToBE', messages);
+        console.log(name + messages);
     });
 
     socket.on('disconnect', () => {
